@@ -28,10 +28,12 @@ A simple, front-end AI chatbot interface built with HTML, CSS, and JavaScript. T
 2. Open the HTML file in a browser.
 3. Replace the API endpoint and uid in the JavaScript section with your own credentials if necessary.
 
-### Customization
-Styling: Modify the <style> section to change colors, fonts, and layout.
+## Customization
+#### Styling: 
+Modify the <style> section to change colors, fonts, and layout.
 
-API Endpoint: Update the fetch() URL and headers to connect to your preferred AI backend.
+#### API Endpoint: 
+Update the fetch() URL and headers to connect to your preferred AI backend.
 
-License
+#### License:
 This project is licensed under the MIT License – feel free to use and modify it for your own purposes.
