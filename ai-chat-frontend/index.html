@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AI Chat (Full Screen)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <button class="new-chat" id="newChatBtn">+ New chat</button>
+      <div class="side-h">Chats</div>
+      <div class="chat-list" id="chatList"></div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <!-- Main -->
+    <section class="main">
+      <header class="topbar">
+        <div class="topbar-inner">
+          <div class="brand">AI Chat</div>
+          <div class="top-controls">
+            <select id="model">
+              <option value="gpt-4o-mini">gpt-4o-mini</option>
+              <option value="gpt-4o">gpt-4o</option>
+              <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+            </select>
+            <button class="btn ghost" id="regen">Regenerate</button>
+            <button class="btn danger" id="stop">Stop</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="scroll" id="scroll">
+        <div class="thread" id="rail">
+          <div class="row system">
+            <div class="avatar">S</div>
+            <div class="bubble">You are a concise, helpful AI assistant.</div>
+          </div>
+          <div class="row assistant">
+            <div class="avatar">A</div>
+            <div class="bubble">Hello! Ask me anything.</div>
+          </div>
+        </div>
+        <div class="status hidden" id="status">Assistant is typing…</div>
+      </div>
+
+      <div class="composer">
+        <div class="composer-inner">
+          <textarea id="input" placeholder="Message… (Enter to send, Shift+Enter = newline)"></textarea>
+          <button class="btn primary" id="send">Send</button>
+        </div>
+        <div class="hint">Press Enter to send • Shift+Enter for newline</div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
