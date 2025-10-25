@@ -1,0 +1,11 @@
+{
+  "name": "ai-chat-bot",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@netlify/blobs": "^8.0.0"
+  },
+  "scripts": {
+    "build": "echo \"static\""
+  }
+}

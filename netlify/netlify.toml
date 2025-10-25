@@ -1,0 +1,8 @@
+[build]
+  publish = "ai-chat-frontend"
+  functions = "netlify/functions"
+  edge_functions = "netlify/edge-functions"
+
+[[edge_functions]]
+  path = "/api/chat/stream"
+  function = "chat-stream"

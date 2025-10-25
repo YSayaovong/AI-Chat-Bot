@@ -1,5 +1,11 @@
-// === Frontend config (no secrets here) ===
-const API_BASE = 'http://localhost:8787'; // match your server PORT/.env
+// === Netlify Same-Origin Frontend ===
+// Calls serverless functions at:
+// - POST /.netlify/functions/session
+// - GET  /.netlify/functions/messages/:sessionId
+// - POST /api/chat/stream   (Edge Function for SSE)
+// No API keys here. Keep OPENAI_API_KEY in Netlify Env Vars.
+
+const API_BASE = ''; // same-origin on Netlify
 const DEFAULT_SYSTEM = 'You are a concise, helpful AI assistant.';
 const $ = id => document.getElementById(id);
 const nanoid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -94,7 +100,7 @@ async function openChat(id){
 }
 
 async function ensureSession(sessionId){
-  await fetch(`${API_BASE}/api/session`, {
+  await fetch(`${API_BASE}/.netlify/functions/session`, {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ sessionId })
@@ -103,11 +109,12 @@ async function ensureSession(sessionId){
 
 async function loadServerHistory(){
   try{
-    const r = await fetch(`${API_BASE}/api/messages/${activeId}`);
+    const r = await fetch(`${API_BASE}/.netlify/functions/messages/${activeId}`);
     const data = await r.json();
-    if (Array.isArray(data?.messages) && data.messages.length){
+    if (Array.isArray(data?.messages)){
       const merged = [ { role:'system', content:DEFAULT_SYSTEM }, ...data.messages ];
       setMsgs(activeId, merged);
+      // If thread is empty in UI, render server history
       if (rail.children.length <= 2){
         rail.innerHTML = '';
         addRow('system', DEFAULT_SYSTEM);
@@ -117,7 +124,7 @@ async function loadServerHistory(){
       const meta = chats.find(c=>c.id===activeId);
       if (firstUser && meta?.title==='New chat') renameChat(activeId, firstUser.content.slice(0,30));
     }
-  } catch(e){ /* optional: toast */ }
+  } catch {/* ignore */}
 }
 
 // ---------------- UI helpers ----------------
@@ -134,8 +141,8 @@ function setLoading(on){
   sendBtn.disabled = on; regenBtn.disabled = on; stopBtn.disabled = !on;
 }
 function stopStream(){ if (ctrl){ ctrl.abort(); ctrl=null; } setLoading(false); }
-function openSidebar(){ sidebar.classList.add('open'); }
-function closeSidebar(){ sidebar.classList.remove('open'); }
+function openSidebar(){ sidebar?.classList.add('open'); }
+function closeSidebar(){ sidebar?.classList.remove('open'); }
 
 // ---------------- Streaming send ----------------
 async function send(messageText, isRegen=false){
@@ -170,7 +177,7 @@ async function send(messageText, isRegen=false){
     const resp = await fetch(`${API_BASE}/api/chat/stream`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId: activeId, model: modelSel.value, messages: msgs }),
+      body: JSON.stringify({ sessionId: activeId, model: modelSel?.value || 'gpt-4o-mini', messages: msgs }),
       signal: ctrl.signal
     });
     if (!resp.ok || !resp.body){
@@ -186,8 +193,6 @@ async function send(messageText, isRegen=false){
       const { done, value } = await reader.read();
       if (done) break;
       const chunk = dec.decode(value);
-      // server emits lines like:
-      // event: token \n data: "..." \n\n
       for (const evt of chunk.split('\n\n')){
         if (!evt.trim()) continue;
         const typeLine = evt.split('\n').find(l=>l.startsWith('event:'));
@@ -207,7 +212,7 @@ async function send(messageText, isRegen=false){
     }
   } catch(e){
     if (e.name !== 'AbortError'){
-      bubble.textContent += '\nNetwork error. Is the server running?';
+      bubble.textContent += '\nNetwork error.';
     }
   } finally {
     setLoading(false); ctrl = null;
@@ -220,11 +225,10 @@ async function send(messageText, isRegen=false){
 }
 
 // ---------------- Events ----------------
-sendBtn.addEventListener('click', ()=>send());
-input.addEventListener('keydown', (e)=>{ if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
-stopBtn.addEventListener('click', stopStream);
-regenBtn.addEventListener('click', ()=>send('', true));
-newChatBtn.addEventListener('click', ()=>{ const c=createChat(); renderSidebar(); openChat(c.id); });
-// Optional: mobile sidebar toggles if you’ve added the button
-if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
-if (scrim) scrim.addEventListener('click', closeSidebar);
+sendBtn?.addEventListener('click', ()=>send());
+input?.addEventListener('keydown', (e)=>{ if (e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+stopBtn?.addEventListener('click', stopStream);
+regenBtn?.addEventListener('click', ()=>send('', true));
+newChatBtn?.addEventListener('click', ()=>{ const c=createChat(); renderSidebar(); openChat(c.id); });
+toggleBtn?.addEventListener('click', openSidebar);
+scrim?.addEventListener('click', closeSidebar);
